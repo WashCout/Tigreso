@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Jogo do Tigreso</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(to bottom, #ffe066, #ff6f61);
+      text-align: center;
+      padding: 30px;
+    }
+
+    h1 {
+      color: #5c2b00;
+    }
+
+    .roleta {
+      font-size: 50px;
+      margin: 20px 0;
+    }
+
+    .resultado {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 10px;
+    }
+
+    button {
+      padding: 10px 25px;
+      font-size: 18px;
+      background-color: #ff9f1c;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 2px 2px 6px #00000044;
+      margin: 5px;
+    }
+
+    button:hover {
+      background-color: #ffbf69;
+    }
+
+    .saldo {
+      font-size: 20px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎰 JOGO DO TIGRESO 🎰</h1>
+
+  <div class="roleta" id="roleta">🐯 | 🐠 | 🍌</div>
+  <div class="resultado" id="mensagem">Clique para jogar!</div>
+<div style="margin-bottom: 10px;">
+  <label for="valorAposta">Valor da aposta: R$ </label>
+  <input type="number" id="valorAposta" value="1.00" min="0.10" step="0.10" style="width: 80px;">
+</div>
+
+  <button onclick="girar()">Girar</button>
+  <button onclick="recarregar()">Recarregar R$ 10,00</button>
+
+  <div class="saldo" id="saldo">Saldo: R$ 10,00</div>
+
+  <script>
+    const simbolos = ['🐯', '🐠', '🍌', '🐍', '❤️'];
+    const pagamentos = {
+      '🐯': 5,
+      '🐠': 4,
+      '🍌': 3,
+      '🐍': 2,
+      '❤️': 1
+    };
+
+    let aposta = 1.00;
+    let saldo = 0;
+
+    // Recupera o saldo salvo no navegador
+    if (localStorage.getItem('saldo')) {
+      saldo = parseFloat(localStorage.getItem('saldo'));
+    } else {
+      saldo = 10.00;
+      localStorage.setItem('saldo', saldo.toString());
+    }
+
+    // Atualiza o saldo na tela e salva no navegador
+    function atualizarSaldo() {
+      document.getElementById('saldo').innerText = `Saldo: R$ ${saldo.toFixed(2)}`;
+      localStorage.setItem('saldo', saldo.toFixed(2));
+    }
+
+    function girar() {
+    aposta = parseFloat(document.getElementById('valorAposta').value);
+
+      if (saldo < aposta) {
+        document.getElementById('mensagem').innerText = 'Saldo insuficiente!';
+        return;
+      }
+  // 🎁 JACKPOT aleatório: 1 chance em 200
+  const chanceJackpot = Math.floor(Math.random() * 200);
+  if (chanceJackpot === 0) {
+    saldo += 50;
+    document.getElementById('mensagem').innerText = '🎊 JACKPOT! Você ganhou R$ 50,00!';
+    atualizarSaldo();
+    return;
+  }
+
+      const s1 = simbolos[Math.floor(Math.random() * simbolos.length)];
+      const s2 = simbolos[Math.floor(Math.random() * simbolos.length)];
+      const s3 = simbolos[Math.floor(Math.random() * simbolos.length)];
+
+      document.getElementById('roleta').innerText = `${s1} | ${s2} | ${s3}`;
+
+      if (s1 === s2 && s2 === s3) {
+        const premio = pagamentos[s1];
+        saldo += premio;
+        document.getElementById('mensagem').innerText = `🎉 Você ganhou R$ ${premio.toFixed(2)}!`;
+      } else {
+        saldo -= aposta;
+
+        // Verifica se foi quase vitória (2 iguais)
+        if (s1 === s2 || s2 === s3 || s1 === s3) {
+          document.getElementById('mensagem').innerText = `😬 Uhh... Quase deu!`;
+        } else {
+          document.getElementById('mensagem').innerText = `😢 Você perdeu R$ ${aposta.toFixed(2)}.`;
+        }
+      }
+
+      atualizarSaldo();
+    }
+
+    function recarregar() {
+      saldo += 10;
+      document.getElementById('mensagem').innerText = '💳 Crédito adicionado com sucesso!';
+      atualizarSaldo();
+    }
+
+    // Atualiza saldo na tela ao carregar a página
+    window.onload = atualizarSaldo;
+  </script>
+
+</body>
+</html>
